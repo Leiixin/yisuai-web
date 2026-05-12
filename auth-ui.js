@@ -123,18 +123,31 @@
       syncUserChrome(null);
       return;
     }
-    auth.getSession().then(function (res) {
+    function syncFromSession(res) {
+      if (res && res.error) {
+        console.warn("butterfly auth sync getSession", res.error);
+      }
       var sess = res && res.data && res.data.session;
       function afterPull() {
         syncUserChrome(sess);
-        if (typeof window.__skillsCloudRefresh === "function") {
-          window.__skillsCloudRefresh();
-        }
+        var pr = typeof window.__skillsCloudRefresh === "function" ? window.__skillsCloudRefresh() : null;
+        Promise.resolve(pr).catch(function (eSk) {
+          console.warn("butterfly auth sync skills refresh", eSk);
+        });
       }
       if (sess && typeof window.__profileCloudPull === "function") {
         window.__profileCloudPull().then(afterPull).catch(afterPull);
       } else {
         afterPull();
+      }
+    }
+    auth.getSession().then(function (res) {
+      syncFromSession(res);
+      var sess = res && res.data && res.data.session;
+      if (!sess && !(res && res.error)) {
+        window.setTimeout(function () {
+          auth.getSession().then(syncFromSession);
+        }, 80);
       }
     });
   };

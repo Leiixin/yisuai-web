@@ -61,7 +61,7 @@
         .then(function (r) {
           if (r.error) {
             console.warn("profile cloud pull", r.error);
-            return { ok: false, error: r.error };
+            return { ok: false, error: r.error, message: r.error.message || String(r.error) };
           }
           if (!r.data) {
             return { ok: true, empty: true };
@@ -74,6 +74,10 @@
             return { ok: false, error: e1 };
           }
           return { ok: true, profile: p };
+        })
+        .catch(function (err) {
+          console.warn("profile cloud pull network", err);
+          return { ok: false, message: (err && err.message) || "网络异常" };
         });
     });
   };

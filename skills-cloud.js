@@ -90,16 +90,20 @@
   window.__skillsCloudRefresh = function (done) {
     var c = getClient();
     var arr = window.__skillsCloudCache;
+    function finishFromDone() {
+      if (typeof done === "function") {
+        done();
+      }
+    }
     if (!c) {
       arr.length = 0;
       window.__skillsCloudSessionUserId = null;
       notifyRender();
-      if (typeof done === "function") {
-        done();
-      }
-      return;
+      finishFromDone();
+      return Promise.resolve();
     }
-    c.from(TABLE)
+    return c
+      .from(TABLE)
       .select("*")
       .order("created_at", { ascending: false })
       .then(function (res) {
@@ -114,16 +118,17 @@
         var auth = window.__butterflyAuth;
         function finishRefresh() {
           notifyRender();
-          if (typeof done === "function") {
-            done();
-          }
+          finishFromDone();
         }
         if (!auth || !auth.getSession) {
           window.__skillsCloudSessionUserId = null;
           finishRefresh();
-          return;
+          return undefined;
         }
-        auth.getSession().then(function (sr) {
+        return auth.getSession().then(function (sr) {
+          if (sr && sr.error) {
+            console.warn("[skills-cloud] refresh getSession", sr.error);
+          }
           var u = sr && sr.data && sr.data.session && sr.data.session.user && sr.data.session.user.id;
           window.__skillsCloudSessionUserId = u ? String(u) : null;
           finishRefresh();
@@ -134,9 +139,7 @@
         console.warn("[skills-cloud] 拉取 skills 异常（网络或客户端）:", err);
         window.__skillsCloudSessionUserId = null;
         notifyRender();
-        if (typeof done === "function") {
-          done();
-        }
+        finishFromDone();
       });
   };
 
