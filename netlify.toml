@@ -1,0 +1,3 @@
+# 纯静态站点：发布根目录为本文件夹（在 Netlify 控制台将 base directory 指向本仓库时与此一致）
+[build]
+  publish = "."

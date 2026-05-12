@@ -1,0 +1,6 @@
+# Local Supabase keys — copy from auth-config.example.js
+auth-config.js
+
+# Cursor / 本地发布包
+.cursor/
+*-publish.zip

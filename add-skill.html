@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-agent-color-mode="system" data-agent-theme-palette="default">
+  <head>
+    <script>
+      try {
+        var _am = localStorage.getItem("agent_color_mode");
+        if (_am === "light" || _am === "dark") {
+          _am = "system";
+        }
+        if (_am === "system") {
+          document.documentElement.setAttribute("data-agent-color-mode", "system");
+        }
+        var _tp = localStorage.getItem("agent_theme_palette");
+        document.documentElement.setAttribute(
+          "data-agent-theme-palette",
+          _tp === "forest" ? "forest" : "default"
+        );
+      } catch (e0) {}
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>添加技能 - 一粟AI</title>
+    <link rel="icon" type="image/png" href="logo-yisuai.png" />
+    <link rel="apple-touch-icon" href="logo-yisuai.png" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body class="page-add-skill">
+    <div class="app-shell" id="app-shell">
+      <aside class="app-sidebar" id="app-sidebar" aria-label="功能导航">
+        <div class="app-sidebar__toolbar">
+          <div class="app-brand">
+            <span class="app-brand__mark" aria-hidden="true"
+              ><img
+                class="app-brand__mark-img"
+                src="logo-yisuai.png"
+                alt=""
+                width="32"
+                height="32"
+                loading="lazy"
+                decoding="async"
+            /></span>
+            <div class="app-brand__text">
+              <span class="app-brand__name">一粟AI</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="app-sidebar__toggle"
+            id="sidebar-toggle"
+            aria-expanded="true"
+            aria-controls="app-sidebar"
+            aria-label="收起侧栏"
+            title="收起侧栏"
+          >
+            <svg
+              class="app-sidebar__toggle-ico app-sidebar__toggle-ico--collapse"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              <line x1="9" y1="4" x2="9" y2="20" />
+            </svg>
+            <svg
+              class="app-sidebar__toggle-ico app-sidebar__toggle-ico--expand"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <rect x="2.5" y="3.5" width="10.5" height="17" rx="1.5" />
+              <line x1="5.2" y1="3.5" x2="5.2" y2="20.5" />
+              <path d="M16 8.5l4 3.5-4 3.5" />
+              <line x1="20" y1="12" x2="13" y2="12" />
+            </svg>
+          </button>
+        </div>
+        <div class="app-sidebar__body">
+          <nav class="app-nav" id="sidebar-nav" aria-label="页面导航">
+            <a class="app-nav__link" href="index.html#top" title="首页"
+              ><span class="app-nav__icon" aria-hidden="true"
+                ><svg class="app-nav__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"
+                  ><path d="M12 3.5L4.5 10.5V20.5H19.5V10.5L12 3.5Z" /></svg
+                ></span
+              ><span class="app-nav__label">首页</span></a
+            >
+            <a class="app-nav__link" href="index.html#store-user-skills" title="技能商店"
+              ><span class="app-nav__icon" aria-hidden="true"
+                ><svg class="app-nav__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"
+                  ><line x1="7" y1="18" x2="7" y2="11" /><line x1="12" y1="18" x2="12" y2="7" /><line x1="17" y1="18" x2="17" y2="13" /></svg
+                ></span
+              ><span class="app-nav__label">技能商店</span></a
+            >
+            <a class="app-nav__link" href="index.html#my-skills" title="我的技能"
+              ><span class="app-nav__icon" aria-hidden="true"
+                ><svg class="app-nav__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"
+                  ><path d="M12 6L13.5 9.9 17.7 10.1 14.5 12.8 15.5 16.9 12 14.6 8.5 16.9 9.5 12.8 6.3 10.1 10.5 9.9z" /></svg
+                ></span
+              ><span class="app-nav__label">我的技能</span></a
+            >
+            <a class="app-nav__link" href="add-skill.html" title="添加技能" aria-current="page"
+              ><span class="app-nav__icon" aria-hidden="true"
+                ><svg class="app-nav__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"
+                  ><path d="M12 5v14M5 12h14" /></svg
+                ></span
+              ><span class="app-nav__label">添加技能</span></a
+            >
+            <a class="app-nav__link" href="index.html#my-favorites" title="我的收藏"
+              ><span class="app-nav__icon" aria-hidden="true"
+                ><svg class="app-nav__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"
+                  ><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg
+                ></span
+              ><span class="app-nav__label">我的收藏</span></a
+            >
+          </nav>
+        </div>
+        <div class="app-user-wrap" id="app-user-wrap">
+          <button
+            type="button"
+            class="app-user"
+            id="app-user-trigger"
+            title="点按打开：主题、设置、联系我们、退出登录。数据仅保存在本机、不上传。"
+            aria-label="点按打开用户菜单。主题、设置、联系我们、退出登录。"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-controls="app-user-menu"
+          >
+            <div class="app-user__avatar" id="app-user-bar-avatar-wrap" aria-hidden="true">
+              <img
+                class="app-user__avatar-img"
+                id="app-user-bar-avatar"
+                alt=""
+                width="40"
+                height="40"
+                decoding="async"
+                hidden
+              />
+              <span class="app-user__avatar-fallback">我</span>
+            </div>
+            <div class="app-user__text">
+              <span class="app-user__name">本地用户</span>
+              <span class="app-user__meta"
+                >仅本机 <span class="app-user__meta-cta" aria-hidden="true">点按打开菜单</span></span
+              >
+            </div>
+            <span class="app-user__open-hint" aria-hidden="true">
+              <svg class="app-user__open-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </span>
+          </button>
+          <div
+            class="app-user-menu"
+            id="app-user-menu"
+            role="menu"
+            hidden
+            aria-label="用户菜单"
+          >
+            <div class="app-user-menu__head" role="none">
+              <div class="app-user-menu__avatar" id="app-user-menu-avatar-wrap" aria-hidden="true">
+                <img
+                  class="app-user-menu__avatar-img"
+                  id="app-user-menu-avatar"
+                  alt=""
+                  width="36"
+                  height="36"
+                  decoding="async"
+                  hidden
+                />
+                <span class="app-user-menu__avatar-fallback">我</span>
+              </div>
+              <div class="app-user-menu__head-txt">
+                <span class="app-user-menu__name">本地用户</span>
+              </div>
+            </div>
+            <div class="app-user-menu__hr" role="none"></div>
+            <div class="app-user-menu__section" role="none">
+              <button type="button" class="app-user-menu__row app-user-menu__row--tight" id="app-user-menu-theme" role="menuitem">
+                <span class="app-user-menu__label">主题</span>
+                <span class="app-user-menu__row-right">
+                  <span class="app-user-menu__value" id="app-user-menu-theme-label">跟随系统 · 春花</span>
+                  <svg class="app-user-menu__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M9 6l6 6-6 6" />
+                  </svg>
+                </span>
+              </button>
+              <button type="button" class="app-user-menu__row" id="app-user-menu-settings" role="menuitem">
+                <span class="app-user-menu__label">设置</span>
+              </button>
+              <button type="button" class="app-user-menu__row app-user-menu__row--tight" id="app-user-menu-contact" role="menuitem">
+                <span class="app-user-menu__label">联系我们</span>
+                <span class="app-user-menu__row-right">
+                  <svg class="app-user-menu__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M9 6l6 6-6 6" />
+                  </svg>
+                </span>
+              </button>
+            </div>
+            <div class="app-user-menu__hr" role="none"></div>
+            <div class="app-user-menu__foot" role="none">
+              <a
+                class="app-user-menu__row app-user-menu__row--logout"
+                href="login.html"
+                id="app-user-menu-logout"
+                role="menuitem"
+                tabindex="0"
+                >退出登录</a>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <div class="app-main app-main--view-mine">
+        <main class="page">
+          <div class="add-skill-page">
+            <nav class="add-skill-page__subnav" role="tablist" aria-label="添加方式">
+              <button
+                type="button"
+                class="add-skill-page__subnav-tab"
+                id="add-skill-tab-url"
+                role="tab"
+                aria-selected="true"
+                aria-controls="add-skill-layout-fields"
+                data-add-skill-tab="url"
+              >
+                添加网址
+              </button>
+              <button
+                type="button"
+                class="add-skill-page__subnav-tab"
+                id="add-skill-tab-knowledge"
+                role="tab"
+                aria-selected="false"
+                aria-controls="add-skill-layout-fields"
+                data-add-skill-tab="knowledge"
+              >
+                添加知识
+              </button>
+            </nav>
+            <h1 class="sr-only" id="add-skill-page-h1">添加技能</h1>
+            <section class="add-panel add-panel--mine card-elevated" aria-labelledby="form-title">
+              <h2 id="form-title" class="sr-only">添加</h2>
+              <form id="add-form" class="form form--inline form--add-skill-page" novalidate>
+                <div class="add-skill-layout">
+                  <aside class="add-skill-layout__media" aria-label="技能头像">
+                    <div class="add-skill-avatar-only">
+                      <label class="sr-only" for="add-skill-card-file">上传技能头像</label>
+                      <input
+                        id="add-skill-card-file"
+                        name="cardImage"
+                        type="file"
+                        accept="image/jpeg,image/png,image/gif,image/webp"
+                        hidden
+                      />
+                      <div class="add-skill-avatar-shell">
+                        <div class="add-skill-avatar-ring">
+                          <p class="add-skill-avatar-ring__placeholder" id="add-skill-avatar-placeholder">
+                            点击右下角<br />添加图片
+                          </p>
+                          <div id="add-skill-card-preview" class="add-skill-avatar-preview" hidden></div>
+                        </div>
+                        <button
+                          type="button"
+                          class="add-skill-avatar-fab"
+                          id="add-skill-avatar-fab"
+                          title="选择或更换图片"
+                          aria-label="选择或更换技能头像"
+                        >
+                          <svg
+                            class="add-skill-avatar-fab__svg"
+                            viewBox="0 0 24 24"
+                            width="18"
+                            height="18"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            aria-hidden="true"
+                            focusable="false"
+                          >
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </aside>
+                  <div class="add-skill-layout__fields" id="add-skill-layout-fields">
+                    <div class="form-row form-row--add-skill-fields-top">
+                      <div class="field field--name">
+                        <label for="name">名称（可选）</label>
+                        <input id="name" name="name" type="text" placeholder="例如：主站" autocomplete="off" />
+                      </div>
+                      <div class="field field--url">
+                        <label for="url">URL <span class="req">*</span></label>
+                        <input
+                          id="url"
+                          name="url"
+                          type="url"
+                          inputmode="url"
+                          required
+                          placeholder="https://"
+                          autocomplete="url"
+                        />
+                      </div>
+                    </div>
+                    <div class="add-skill-extra">
+                      <div class="field field--stack">
+                        <label for="add-skill-detail-intro">详情介绍（可选）</label>
+                        <textarea
+                          id="add-skill-detail-intro"
+                          name="detailIntro"
+                          class="add-skill-extra__textarea"
+                          rows="5"
+                          maxlength="4000"
+                          placeholder="一句话或一小段介绍，将显示在卡片与详情中。"
+                        ></textarea>
+                      </div>
+                      <div class="form-row form-row--add-skill-split">
+                        <div class="field field--stack field--grow">
+                          <div class="add-skill-cat-picker" id="add-skill-cat-picker">
+                            <label for="add-skill-category-trigger">分类（可选）</label>
+                            <div class="add-skill-cat-picker__shell">
+                              <button
+                                type="button"
+                                class="add-skill-cat-picker__trigger add-skill-extra__select"
+                                id="add-skill-category-trigger"
+                                aria-haspopup="dialog"
+                                aria-expanded="false"
+                                aria-controls="add-skill-category-dropdown"
+                              >
+                                <span id="add-skill-category-trigger-label">未选分类</span>
+                                <span class="add-skill-cat-picker__trigger-chev" aria-hidden="true"></span>
+                              </button>
+                              <select id="add-skill-category-top" class="sr-only" tabindex="-1" aria-hidden="true">
+                                <option value="">未选分类</option>
+                                <option value="电商">电商</option>
+                                <option value="办公提效">办公提效</option>
+                                <option value="通用">通用</option>
+                              </select>
+                              <div
+                                id="add-skill-category-dropdown"
+                                class="add-skill-cat-picker__dropdown"
+                                role="dialog"
+                                aria-label="选择分类"
+                                hidden
+                              >
+                                <div class="add-skill-cat-picker__cols">
+                                  <ul
+                                    class="add-skill-cat-picker__main"
+                                    role="listbox"
+                                    id="add-skill-cat-picker-main"
+                                    aria-label="一级分类"
+                                  >
+                                    <li
+                                      class="add-skill-cat-picker__opt add-skill-cat-picker__opt--branch"
+                                      role="option"
+                                      tabindex="-1"
+                                      data-cat-top="电商"
+                                    >
+                                      <span>电商</span>
+                                      <span class="add-skill-cat-picker__branch-chev" aria-hidden="true">›</span>
+                                    </li>
+                                    <li
+                                      class="add-skill-cat-picker__opt"
+                                      role="option"
+                                      tabindex="-1"
+                                      data-cat-top="办公提效"
+                                    >
+                                      办公提效
+                                    </li>
+                                    <li
+                                      class="add-skill-cat-picker__opt"
+                                      role="option"
+                                      tabindex="-1"
+                                      data-cat-top="通用"
+                                    >
+                                      通用
+                                    </li>
+                                  </ul>
+                                  <div class="add-skill-cat-picker__sub" id="add-skill-category-ec-submenu" hidden>
+                                    <p class="add-skill-cat-picker__sub-title">电商子类</p>
+                                    <div class="add-skill-category-ec-flyout__btns" role="group" aria-label="选择电商子类">
+                                      <button type="button" class="add-skill-ec-sub" data-ec-sub="运营">运营</button>
+                                      <button type="button" class="add-skill-ec-sub" data-ec-sub="供应链">供应链</button>
+                                      <button type="button" class="add-skill-ec-sub" data-ec-sub="客服">客服</button>
+                                      <button type="button" class="add-skill-ec-sub" data-ec-sub="物流">物流</button>
+                                      <button type="button" class="add-skill-ec-sub" data-ec-sub="耗材">耗材</button>
+                                      <button type="button" class="add-skill-ec-sub" data-ec-sub="仓库">仓库</button>
+                                      <button type="button" class="add-skill-ec-sub" data-ec-sub="IT">IT</button>
+                                      <button type="button" class="add-skill-ec-sub" data-ec-sub="其他">其他</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <input type="hidden" id="add-skill-category" name="category" value="" />
+                          <p id="add-skill-category-legacy-hint" class="add-skill-extra__hint" hidden></p>
+                        </div>
+                        <div class="field field--stack field--grow">
+                          <label for="add-skill-open-source">是否开源</label>
+                          <select id="add-skill-open-source" name="openSource" class="add-skill-extra__select" aria-label="是否开源">
+                            <option value="yes">是</option>
+                            <option value="no" selected>否</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="add-skill-cases-block">
+                        <span class="add-skill-cases-block__label" id="add-skill-cases-label">案例配图（可选，最多 6 张）</span>
+                        <div class="add-skill-cases-file-row" role="group" aria-labelledby="add-skill-cases-label">
+                          <input
+                            id="add-skill-cases-file"
+                            name="caseImages"
+                            type="file"
+                            class="sr-only"
+                            accept="image/jpeg,image/png,image/gif,image/webp"
+                            multiple
+                            tabindex="-1"
+                          />
+                          <button
+                            type="button"
+                            class="btn btn-secondary add-skill-cases-file-btn"
+                            id="add-skill-cases-file-btn"
+                            aria-label="选择案例配图，可多选"
+                          >
+                            选择文件
+                          </button>
+                          <span id="add-skill-cases-file-status" class="add-skill-cases-file-status" aria-live="polite"></span>
+                        </div>
+                        <div
+                          id="add-skill-cases-preview"
+                          class="add-skill-img-preview add-skill-img-preview--cases"
+                          hidden
+                          aria-label="案例配图预览"
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <p id="form-error" class="msg msg-error" role="alert" hidden></p>
+                <div class="form-row form-row--add-submit">
+                  <div class="field field--action">
+                    <span class="field--action-label" aria-hidden="true">&nbsp;</span>
+                    <button type="submit" class="btn btn-primary btn--add">添加</button>
+                  </div>
+                </div>
+              </form>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <div
+      id="add-skill-preview-lightbox"
+      class="add-skill-preview-lightbox"
+      hidden
+      aria-hidden="true"
+    >
+      <button
+        type="button"
+        class="add-skill-preview-lightbox__backdrop"
+        id="add-skill-preview-lightbox-backdrop"
+        tabindex="-1"
+        aria-label="关闭预览"
+      ></button>
+      <div class="add-skill-preview-lightbox__frame" role="dialog" aria-modal="true" aria-label="放大预览">
+        <button type="button" class="add-skill-preview-lightbox__close" id="add-skill-preview-lightbox-close" aria-label="关闭">
+          ×
+        </button>
+        <img
+          id="add-skill-preview-lightbox-img"
+          class="add-skill-preview-lightbox__img"
+          src=""
+          alt=""
+          width="1"
+          height="1"
+        />
+      </div>
+    </div>
+
+    <div class="app-settings" id="app-settings" hidden aria-hidden="true">
+      <div class="app-settings__backdrop" id="app-settings-backdrop" tabindex="-1" aria-hidden="true"></div>
+      <div
+        class="app-settings__sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="app-settings-title"
+      >
+        <button type="button" class="app-settings__close" id="app-settings-close" aria-label="关闭设置">
+          ×
+        </button>
+        <div class="app-settings__layout">
+          <aside class="app-settings__nav" aria-label="设置分类">
+            <h2 id="app-settings-title" class="app-settings__title">系统设置</h2>
+            <nav class="app-settings__nav-list" role="tablist" aria-label="设置导航">
+              <button
+                type="button"
+                class="app-settings__nav-item is-active"
+                role="tab"
+                id="settings-tab-profile"
+                aria-selected="true"
+                aria-controls="settings-panel-profile"
+                data-settings-panel="profile"
+              >
+                <svg class="app-settings__nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"
+                  ><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg
+                >
+                个人信息
+              </button>
+              <button
+                type="button"
+                class="app-settings__nav-item"
+                role="tab"
+                id="settings-tab-general"
+                aria-selected="false"
+                aria-controls="settings-panel-general"
+                data-settings-panel="general"
+              >
+                <svg class="app-settings__nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"
+                  ><line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" /><line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" /><line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" /><line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" /><line x1="17" y1="16" x2="23" y2="16" /></svg
+                >
+                通用设置
+              </button>
+              <button
+                type="button"
+                class="app-settings__nav-item"
+                role="tab"
+                id="settings-tab-apps"
+                aria-selected="false"
+                aria-controls="settings-panel-apps"
+                data-settings-panel="apps"
+              >
+                <svg class="app-settings__nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"
+                  ><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg
+                >
+                应用和权限
+              </button>
+              <button
+                type="button"
+                class="app-settings__nav-item"
+                role="tab"
+                id="settings-tab-about"
+                aria-selected="false"
+                aria-controls="settings-panel-about"
+                data-settings-panel="about"
+              >
+                <svg class="app-settings__nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"
+                  ><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg
+                >
+                关于一粟AI
+              </button>
+              <button
+                type="button"
+                class="app-settings__nav-item"
+                role="tab"
+                id="settings-tab-policies"
+                aria-selected="false"
+                aria-controls="settings-panel-policies"
+                data-settings-panel="policies"
+              >
+                <svg class="app-settings__nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"
+                  ><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg
+                >
+                政策与协议
+              </button>
+              <button
+                type="button"
+                class="app-settings__nav-item"
+                role="tab"
+                id="settings-tab-account"
+                aria-selected="false"
+                aria-controls="settings-panel-account"
+                data-settings-panel="account"
+              >
+                <svg class="app-settings__nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"
+                  ><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" y1="8" x2="20" y2="14" /><line x1="23" y1="11" x2="17" y2="11" /></svg
+                >
+                账号与安全
+              </button>
+            </nav>
+          </aside>
+          <div class="app-settings__main">
+            <section
+              class="app-settings__panel is-visible"
+              id="settings-panel-profile"
+              role="tabpanel"
+              aria-labelledby="settings-tab-profile"
+              aria-hidden="false"
+            >
+              <h3 class="app-settings__panel-title">个人信息</h3>
+              <div class="app-settings__profile-summary">
+                <div class="app-settings__avatar-wrap">
+                  <img
+                    class="app-settings__avatar-img"
+                    id="settings-avatar-img"
+                    src="logo-yisuai.png"
+                    alt=""
+                    width="80"
+                    height="80"
+                  />
+                  <button type="button" class="app-settings__avatar-edit" id="settings-avatar-btn" title="更换头像" aria-label="更换头像">
+                    <svg class="app-settings__avatar-edit-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                  </button>
+                  <input type="file" id="settings-avatar-input" accept="image/jpeg,image/png,image/gif,image/webp" hidden />
+                </div>
+                <div class="app-settings__card">
+                  <div class="app-settings__field">
+                    <label class="app-settings__label" for="settings-nickname"
+                      >昵称 <span class="app-settings__req" aria-hidden="true">*</span></label
+                    >
+                    <input class="app-settings__input" type="text" id="settings-nickname" maxlength="32" placeholder="显示名称" autocomplete="nickname" />
+                  </div>
+                  <div class="app-settings__field">
+                    <label class="app-settings__label" for="settings-bio"
+                      >个性签名 <span class="app-settings__req" aria-hidden="true">*</span></label
+                    >
+                    <div class="app-settings__textarea-wrap">
+                      <textarea class="app-settings__textarea" id="settings-bio" maxlength="50" rows="3" placeholder="一句话介绍自己"></textarea>
+                      <span class="app-settings__textarea-count" id="settings-bio-count">0/50</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="app-settings__actions">
+                <button type="button" class="btn skill-detail__save" id="settings-save-profile">保存</button>
+              </div>
+              <p class="app-settings__toast" id="settings-profile-toast" hidden aria-live="polite"></p>
+            </section>
+
+            <section class="app-settings__panel" id="settings-panel-general" role="tabpanel" aria-labelledby="settings-tab-general" aria-hidden="true">
+              <h3 class="app-settings__panel-title">通用设置</h3>
+              <p class="app-settings__placeholder">语言、通知等选项将陆续补充。主题可在侧栏用户菜单中切换。</p>
+            </section>
+
+            <section class="app-settings__panel" id="settings-panel-apps" role="tabpanel" aria-labelledby="settings-tab-apps" aria-hidden="true">
+              <h3 class="app-settings__panel-title">应用和权限</h3>
+              <p class="app-settings__placeholder">本机技能与链接的权限说明将在此汇总；当前版本数据仅存浏览器本地。</p>
+            </section>
+
+            <section class="app-settings__panel" id="settings-panel-about" role="tabpanel" aria-labelledby="settings-tab-about" aria-hidden="true">
+              <h3 class="app-settings__panel-title">关于一粟AI</h3>
+              <p class="app-settings__placeholder">一粟AI 管理常用地址与能力。账号登录用于身份与未来云端能力；技能数据默认仅存本机。</p>
+            </section>
+
+            <section class="app-settings__panel" id="settings-panel-policies" role="tabpanel" aria-labelledby="settings-tab-policies" aria-hidden="true">
+              <h3 class="app-settings__panel-title">政策与协议</h3>
+              <p class="app-settings__placeholder">服务条款与隐私说明链接可在上架前在此补充。</p>
+              <p class="app-settings__muted"><a class="app-settings__link" href="#" id="settings-policy-placeholder">占位链接</a></p>
+            </section>
+
+            <section class="app-settings__panel" id="settings-panel-account" role="tabpanel" aria-labelledby="settings-tab-account" aria-hidden="true">
+              <h3 class="app-settings__panel-title">账号与安全</h3>
+              <p class="app-settings__placeholder" id="settings-account-line">登录邮箱与密码请在登录页管理。</p>
+              <p class="app-settings__muted"><a class="app-settings__link" href="login.html">前往登录页</a></p>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="auth-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+    <script src="auth-client.js"></script>
+    <script src="profile-cloud.js"></script>
+    <script src="auth-ui.js"></script>
+    <script src="app.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,194 @@
+/**
+ * 技能云端：Supabase public.skills 表。依赖 auth-client 的 __butterflyAuth.getClient()
+ * 建表与 RLS 见 supabase/skills_cloud.sql
+ */
+(function () {
+  "use strict";
+
+  var TABLE = "skills";
+  /** 单条 JSON 中案例图 data URL 总长度上限，避免请求过大失败 */
+  var MAX_IMAGES_JSON_CHARS = 480000;
+
+  function getClient() {
+    return window.__butterflyAuth && window.__butterflyAuth.getClient && window.__butterflyAuth.getClient();
+  }
+
+  window.__skillsCloudCache = [];
+
+  function slimImages(arr) {
+    if (!Array.isArray(arr)) {
+      return [];
+    }
+    var out = [];
+    var total = 0;
+    for (var i = 0; i < arr.length; i += 1) {
+      var s = arr[i];
+      if (typeof s !== "string" || s.indexOf("data:image/") !== 0) {
+        continue;
+      }
+      if (s.length > 400000) {
+        continue;
+      }
+      if (total + s.length > MAX_IMAGES_JSON_CHARS) {
+        break;
+      }
+      out.push(s);
+      total += s.length;
+    }
+    return out;
+  }
+
+  function itemToRow(item, userId, authorDisplay) {
+    return {
+      id: String(item.id),
+      user_id: userId,
+      name: String(item.name || ""),
+      url: String(item.url || ""),
+      detail_intro: item.detailIntro != null && String(item.detailIntro).length ? String(item.detailIntro) : null,
+      featured_cases: item.featuredCases != null && String(item.featuredCases).length ? String(item.featuredCases) : null,
+      featured_cases_images: slimImages(item.featuredCasesImages),
+      skill_category: item.skillCategory != null && String(item.skillCategory).trim() ? String(item.skillCategory).trim() : null,
+      open_source_mode: item.openSourceMode === "yes" || item.openSourceMode === "no" ? item.openSourceMode : null,
+      author_display: authorDisplay != null && String(authorDisplay).trim() ? String(authorDisplay).trim() : null,
+      created_at: item.createdAt || new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+  }
+
+  function rowToItem(r) {
+    var imgs = r.featured_cases_images;
+    if (!Array.isArray(imgs)) {
+      imgs = [];
+    }
+    return {
+      id: r.id,
+      name: r.name,
+      url: r.url,
+      createdAt: r.created_at,
+      detailIntro: r.detail_intro,
+      featuredCases: r.featured_cases,
+      featuredCasesImages: imgs,
+      skillCategory: r.skill_category,
+      openSourceMode: r.open_source_mode,
+      authorDisplay: r.author_display,
+      fromCloud: true,
+      /** 云端行 user_id，用于「我的技能」仅合并当前账号自己的条目 */
+      cloudUserId: r.user_id != null ? String(r.user_id) : null,
+    };
+  }
+
+  function notifyRender() {
+    if (typeof window.__onSkillsCloudCacheUpdated === "function") {
+      window.__onSkillsCloudCacheUpdated();
+    }
+  }
+
+  window.__skillsCloudRefresh = function (done) {
+    var c = getClient();
+    var arr = window.__skillsCloudCache;
+    if (!c) {
+      arr.length = 0;
+      window.__skillsCloudSessionUserId = null;
+      notifyRender();
+      if (typeof done === "function") {
+        done();
+      }
+      return;
+    }
+    c.from(TABLE)
+      .select("*")
+      .order("created_at", { ascending: false })
+      .then(function (res) {
+        arr.length = 0;
+        if (res.data && res.data.length) {
+          for (var i = 0; i < res.data.length; i += 1) {
+            arr.push(rowToItem(res.data[i]));
+          }
+        }
+        var auth = window.__butterflyAuth;
+        function finishRefresh() {
+          notifyRender();
+          if (typeof done === "function") {
+            done();
+          }
+        }
+        if (!auth || !auth.getSession) {
+          window.__skillsCloudSessionUserId = null;
+          finishRefresh();
+          return;
+        }
+        auth.getSession().then(function (sr) {
+          var u = sr && sr.data && sr.data.session && sr.data.session.user && sr.data.session.user.id;
+          window.__skillsCloudSessionUserId = u ? String(u) : null;
+          finishRefresh();
+        });
+      })
+      .catch(function () {
+        window.__skillsCloudSessionUserId = null;
+        notifyRender();
+        if (typeof done === "function") {
+          done();
+        }
+      });
+  };
+
+  window.__skillsCloudUpsert = function (item) {
+    var auth = window.__butterflyAuth;
+    var c = getClient();
+    if (!c || !auth || !item || !item.id) {
+      return Promise.resolve();
+    }
+    return auth.getSession().then(function (res) {
+      var sess = res && res.data && res.data.session;
+      var uid = sess && sess.user && sess.user.id;
+      if (!uid) {
+        return null;
+      }
+      var nick = "";
+      try {
+        var raw = localStorage.getItem("butterfly_settings_profile_v1");
+        if (raw) {
+          var o = JSON.parse(raw);
+          if (o && o.nickname && String(o.nickname).trim()) {
+            nick = String(o.nickname).trim();
+          }
+        }
+      } catch (e1) {}
+      var row = itemToRow(item, uid, nick);
+      return c.from(TABLE).upsert(row, { onConflict: "id" }).then(function () {
+        window.__skillsCloudRefresh();
+      });
+    });
+  };
+
+  window.__skillsCloudDelete = function (id) {
+    var auth = window.__butterflyAuth;
+    var c = getClient();
+    if (!c || !auth || id == null || id === "") {
+      return Promise.resolve();
+    }
+    return auth.getSession().then(function (res) {
+      var sess = res && res.data && res.data.session;
+      var uid = sess && sess.user && sess.user.id;
+      if (!uid) {
+        return null;
+      }
+      return c
+        .from(TABLE)
+        .delete()
+        .eq("id", String(id))
+        .eq("user_id", uid)
+        .then(function () {
+          window.__skillsCloudRefresh();
+        });
+    });
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () {
+      window.__skillsCloudRefresh();
+    });
+  } else {
+    window.__skillsCloudRefresh();
+  }
+})();
