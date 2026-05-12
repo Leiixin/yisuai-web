@@ -779,7 +779,7 @@
     }
     items.unshift(entry);
     setItems(items);
-    if (typeof window.__skillsCloudUpsert === "function") {
+    if (typeof window.__skillsCloudUpsert === "function" && !opt.deferCloudUpsert) {
       window.__skillsCloudUpsert(entry);
     }
     return entry;
@@ -793,7 +793,8 @@
     setItems(getItems().filter(function (x) { return x.id !== id; }));
   }
 
-  function updateItemById(id, fn) {
+  function updateItemById(id, fn, opts) {
+    opts = opts || {};
     var items = getItems();
     var n = -1;
     for (var i = 0; i < items.length; i += 1) {
@@ -810,7 +811,7 @@
     items = items.slice();
     items[n] = next;
     setItems(items);
-    if (typeof window.__skillsCloudUpsert === "function") {
+    if (typeof window.__skillsCloudUpsert === "function" && !opts.deferCloudUpsert) {
       window.__skillsCloudUpsert(next);
     }
     return next;
@@ -2787,40 +2788,53 @@
         var isKnTabSubmit =
           pageTabEl && pageTabEl.classList.contains("add-skill-page--tab-knowledge");
         var skillKindOut = isKnTabSubmit ? "knowledge" : "url";
+        function goMySkillsAfterCloud() {
+          showFormError("");
+          location.href = "index.html#my-skills";
+        }
+        var cloudWait = Promise.resolve();
         if (isEdit) {
-          var updated = updateItemById(addSkillEditItemId, function (row) {
-            row.name = name;
-            row.url = raw;
-            row.skillKind = skillKindOut;
-            if (detailIntro) {
-              row.detailIntro = detailIntro;
-            } else {
-              delete row.detailIntro;
-            }
-            if (skillCategory) {
-              row.skillCategory = skillCategory;
-            } else {
-              delete row.skillCategory;
-            }
-            row.openSourceMode = openSourceMode;
-            if (cardUrl) {
-              row.cardImageDataUrl = cardUrl;
-            }
-            if (caseArrFinal.length) {
-              row.featuredCasesImages = caseArrFinal;
-            } else {
-              delete row.featuredCasesImages;
-            }
-          });
+          var updated = updateItemById(
+            addSkillEditItemId,
+            function (row) {
+              row.name = name;
+              row.url = raw;
+              row.skillKind = skillKindOut;
+              if (detailIntro) {
+                row.detailIntro = detailIntro;
+              } else {
+                delete row.detailIntro;
+              }
+              if (skillCategory) {
+                row.skillCategory = skillCategory;
+              } else {
+                delete row.skillCategory;
+              }
+              row.openSourceMode = openSourceMode;
+              if (cardUrl) {
+                row.cardImageDataUrl = cardUrl;
+              }
+              if (caseArrFinal.length) {
+                row.featuredCasesImages = caseArrFinal;
+              } else {
+                delete row.featuredCasesImages;
+              }
+            },
+            { deferCloudUpsert: true }
+          );
           if (!updated) {
             showFormError("保存失败：记录已不存在。");
             return;
+          }
+          if (typeof window.__skillsCloudUpsert === "function") {
+            cloudWait = Promise.resolve(window.__skillsCloudUpsert(updated));
           }
         } else {
           var opt = {
             detailIntro: detailIntro,
             skillCategory: skillCategory,
-            skillKind: skillKindOut
+            skillKind: skillKindOut,
+            deferCloudUpsert: true
           };
           if (caseArrFinal.length) {
             opt.featuredCasesImages = caseArrFinal;
@@ -2829,10 +2843,12 @@
           if (cardUrl) {
             opt.cardImageDataUrl = cardUrl;
           }
-          addItem(name, raw, opt);
+          var created = addItem(name, raw, opt);
+          if (typeof window.__skillsCloudUpsert === "function") {
+            cloudWait = Promise.resolve(window.__skillsCloudUpsert(created));
+          }
         }
-        showFormError("");
-        location.href = "index.html#my-skills";
+        cloudWait.then(goMySkillsAfterCloud).catch(goMySkillsAfterCloud);
       }
       if (isEdit) {
         finishCases(null, []);
@@ -3941,6 +3957,8 @@
               elToast.textContent = "已保存到本机与云端";
             } else if (r && r.skipped) {
               elToast.textContent = "已保存到本机浏览器（登录账号后可同步云端）";
+            } else if (r && r.message) {
+              elToast.textContent = "已保存到本机。云端：" + r.message;
             } else {
               elToast.textContent = "已保存到本机，云端同步失败，可稍后再试";
             }

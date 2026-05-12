@@ -18,7 +18,13 @@ drop policy if exists "user_profiles_insert_own" on public.user_profiles;
 create policy "user_profiles_insert_own" on public.user_profiles for insert with check (auth.uid() = user_id);
 
 drop policy if exists "user_profiles_update_own" on public.user_profiles;
-create policy "user_profiles_update_own" on public.user_profiles for update using (auth.uid() = user_id);
+create policy "user_profiles_update_own" on public.user_profiles
+  for update
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
 
 drop policy if exists "user_profiles_delete_own" on public.user_profiles;
 create policy "user_profiles_delete_own" on public.user_profiles for delete using (auth.uid() = user_id);
+
+-- 若表为手工创建，请确保 authenticated 角色可访问该表（否则 PostgREST 返回 401/403）
+grant select, insert, update, delete on table public.user_profiles to authenticated;

@@ -6,6 +6,8 @@
   "use strict";
 
   var TABLE = "skills";
+  /** 与 app.js 知识类占位 URL 一致，用于从云端行推断 skillKind（技能商店「网址/知识」分栏） */
+  var KNOWLEDGE_URL_PLACEHOLDER = "https://invalid.invalid/knowledge";
   /** 单条 JSON 中案例图 data URL 总长度上限，避免请求过大失败 */
   var MAX_IMAGES_JSON_CHARS = 480000;
 
@@ -60,10 +62,12 @@
     if (!Array.isArray(imgs)) {
       imgs = [];
     }
+    var urlStr = String(r.url || "");
     return {
       id: r.id,
       name: r.name,
       url: r.url,
+      skillKind: urlStr === KNOWLEDGE_URL_PLACEHOLDER ? "knowledge" : "url",
       createdAt: r.created_at,
       detailIntro: r.detail_intro,
       featuredCases: r.featured_cases,

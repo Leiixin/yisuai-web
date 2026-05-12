@@ -7,7 +7,8 @@
 
   var TABLE = "user_profiles";
   var STORAGE_KEY = "butterfly_settings_profile_v1";
-  var MAX_AVATAR_CHARS = 900000;
+  /** 云端头像 data URL 字符上限（过大易触发网关/PostgREST 请求体限制导致 upsert 失败） */
+  var MAX_AVATAR_CHARS = 280000;
 
   function getClient() {
     return window.__butterflyAuth && window.__butterflyAuth.getClient && window.__butterflyAuth.getClient();
@@ -29,7 +30,7 @@
     return {
       user_id: userId,
       nickname: String((p && p.nickname) || "").trim().slice(0, 32),
-      bio: String((p && p.bio) || "").trim().slice(0, 100),
+      bio: String((p && p.bio) || "").trim().slice(0, 50),
       avatar_data_url: av,
       updated_at: new Date().toISOString(),
     };
@@ -43,6 +44,10 @@
       return Promise.resolve({ ok: false, skipped: true });
     }
     return auth.getSession().then(function (res) {
+      if (res && res.error) {
+        console.warn("profile cloud pull getSession", res.error);
+        return { ok: false, message: res.error.message || String(res.error) };
+      }
       var sess = res && res.data && res.data.session;
       var uid = sess && sess.user && sess.user.id;
       if (!uid) {
@@ -81,19 +86,34 @@
       return Promise.resolve({ ok: false, skipped: true });
     }
     return auth.getSession().then(function (res) {
+      if (res && res.error) {
+        console.warn("profile cloud push getSession", res.error);
+        return { ok: false, message: res.error.message || String(res.error) };
+      }
       var sess = res && res.data && res.data.session;
       var uid = sess && sess.user && sess.user.id;
       if (!uid) {
         return { ok: false, skipped: true };
       }
       var row = profileToRow(p, uid);
-      return c.from(TABLE).upsert(row, { onConflict: "user_id" }).then(function (r2) {
-        if (r2.error) {
-          console.warn("profile cloud push", r2.error);
-          return { ok: false, error: r2.error };
-        }
-        return { ok: true };
-      });
+      return c
+        .from(TABLE)
+        .upsert(row, { onConflict: "user_id" })
+        .then(function (r2) {
+          if (r2 && r2.error) {
+            console.warn("profile cloud push", r2.error);
+            return {
+              ok: false,
+              error: r2.error,
+              message: r2.error.message || r2.error.code || String(r2.error),
+            };
+          }
+          return { ok: true };
+        })
+        .catch(function (err) {
+          console.warn("profile cloud push network", err);
+          return { ok: false, message: (err && err.message) || "网络异常" };
+        });
     });
   };
 })();
