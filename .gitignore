@@ -1,5 +1,5 @@
-# Local Supabase keys — copy from auth-config.example.js
-auth-config.js
+# 若仓库为公开且不想把 Supabase 配置写入 Git，可恢复忽略 auth-config.js，并改用 Actions Secrets 注入。
+# auth-config.js
 
 # Cursor / 本地发布包
 .cursor/
