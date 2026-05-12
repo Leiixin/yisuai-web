@@ -1,37 +1,6 @@
 (function () {
   "use strict";
 
-  /** 已配置 Supabase 时：主站与添加技能页需登录会话，否则跳转登录页 */
-  (function requireConfiguredAuthSession() {
-    try {
-      if (document.body && document.body.classList.contains("auth-page")) {
-        return;
-      }
-      var auth = window.__butterflyAuth;
-      if (!auth || !auth.isConfigured || !auth.isConfigured()) {
-        return;
-      }
-      if (!auth.getSession) {
-        return;
-      }
-      var p = (location.pathname || "").toLowerCase();
-      if (p.indexOf("login.html") !== -1) {
-        return;
-      }
-      auth
-        .getSession()
-        .then(function (res) {
-          if (res && res.data && res.data.session) {
-            return;
-          }
-          window.location.replace("login.html");
-        })
-        .catch(function () {
-          window.location.replace("login.html");
-        });
-    } catch (eGate0) {}
-  })();
-
   var STORAGE_KEY = "agent_urls_v1";
   var FAVORITES_KEY = "agent_urls_favorites_v1";
   var SETTINGS_PROFILE_KEY = "butterfly_settings_profile_v1";

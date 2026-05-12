@@ -2,6 +2,30 @@
 <html lang="zh-Hans" data-agent-theme-palette="default">
 <head>
   <script>
+    (function () {
+      try {
+        var path = location.pathname || "/";
+        var basePath;
+        if (/\.html$/i.test(path)) {
+          basePath = path.replace(/[^/]+$/, "");
+        } else if (path !== "/" && !path.endsWith("/")) {
+          basePath = path + "/";
+        } else {
+          basePath = path;
+        }
+        if (!basePath || basePath === "/") {
+          return;
+        }
+        var el = document.createElement("base");
+        el.href = location.origin + basePath;
+        var head = document.head || document.getElementsByTagName("head")[0];
+        if (head) {
+          head.insertBefore(el, head.firstChild);
+        }
+      } catch (eBase) {}
+    })();
+  </script>
+  <script>
     try {
       var _tpL = localStorage.getItem("agent_theme_palette");
       document.documentElement.setAttribute(

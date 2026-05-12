@@ -100,7 +100,9 @@
       .order("created_at", { ascending: false })
       .then(function (res) {
         arr.length = 0;
-        if (res.data && res.data.length) {
+        if (res.error) {
+          console.warn("[skills-cloud] 读取 skills 失败（商店/合并将无云端项）:", res.error.message || res.error);
+        } else if (res.data && res.data.length) {
           for (var i = 0; i < res.data.length; i += 1) {
             arr.push(rowToItem(res.data[i]));
           }
@@ -123,7 +125,9 @@
           finishRefresh();
         });
       })
-      .catch(function () {
+      .catch(function (err) {
+        arr.length = 0;
+        console.warn("[skills-cloud] 拉取 skills 异常（网络或客户端）:", err);
         window.__skillsCloudSessionUserId = null;
         notifyRender();
         if (typeof done === "function") {
@@ -155,9 +159,19 @@
         }
       } catch (e1) {}
       var row = itemToRow(item, uid, nick);
-      return c.from(TABLE).upsert(row, { onConflict: "id" }).then(function () {
-        window.__skillsCloudRefresh();
-      });
+      return c
+        .from(TABLE)
+        .upsert(row, { onConflict: "id" })
+        .then(function (ur) {
+          if (ur && ur.error) {
+            console.warn("[skills-cloud] upsert 失败（技能未写入云端）:", ur.error.message || ur.error);
+            return;
+          }
+          window.__skillsCloudRefresh();
+        })
+        .catch(function (err) {
+          console.warn("[skills-cloud] upsert 请求异常:", err);
+        });
     });
   };
 

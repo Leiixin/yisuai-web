@@ -2,6 +2,30 @@
 <html lang="zh-CN" data-agent-color-mode="system" data-agent-theme-palette="default">
   <head>
     <script>
+      (function () {
+        try {
+          var path = location.pathname || "/";
+          var basePath;
+          if (/\.html$/i.test(path)) {
+            basePath = path.replace(/[^/]+$/, "");
+          } else if (path !== "/" && !path.endsWith("/")) {
+            basePath = path + "/";
+          } else {
+            basePath = path;
+          }
+          if (!basePath || basePath === "/") {
+            return;
+          }
+          var el = document.createElement("base");
+          el.href = location.origin + basePath;
+          var head = document.head || document.getElementsByTagName("head")[0];
+          if (head) {
+            head.insertBefore(el, head.firstChild);
+          }
+        } catch (eBase) {}
+      })();
+    </script>
+    <script>
       try {
         var _am = localStorage.getItem("agent_color_mode");
         if (_am === "light" || _am === "dark") {
@@ -678,8 +702,10 @@
     <script src="auth-config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
     <script src="auth-client.js"></script>
+    <script src="auth-gate.js"></script>
     <script src="profile-cloud.js"></script>
     <script src="auth-ui.js"></script>
+    <script src="skills-cloud.js"></script>
     <script src="app.js" defer></script>
   </body>
 </html>

@@ -4,6 +4,11 @@
   box-sizing: border-box;
 }
 
+/* 受保护页：auth-gate.js 校验登录前隐藏正文，避免未登录闪屏 */
+html.auth-gate-pending:not(.auth-gate-ok) body {
+  visibility: hidden;
+}
+
 :root {
   /* 与 impeccable.cn 同源：--color-bg / --color-paper / --color-accent（hue 350）等 */
   --page-bg: oklch(96% 0.006 350);
