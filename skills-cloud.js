@@ -143,7 +143,8 @@
       });
   };
 
-  window.__skillsCloudUpsert = function (item) {
+  window.__skillsCloudUpsert = function (item, opts) {
+    opts = opts || {};
     var auth = window.__butterflyAuth;
     var c = getClient();
     if (!c || !auth || !item || !item.id) {
@@ -174,11 +175,55 @@
             console.warn("[skills-cloud] upsert 失败（技能未写入云端）:", ur.error.message || ur.error);
             return;
           }
-          window.__skillsCloudRefresh();
+          if (!opts.skipRefresh) {
+            window.__skillsCloudRefresh();
+          }
         })
         .catch(function (err) {
           console.warn("[skills-cloud] upsert 请求异常:", err);
         });
+    });
+  };
+
+  /**
+   * 将多条本机技能顺序 upsert 到云端（需已登录）。批量时使用 skipRefresh 避免每条都全表拉取。
+   */
+  window.__skillsCloudSyncLocalList = function (items) {
+    var auth = window.__butterflyAuth;
+    var c = getClient();
+    if (!c || !auth || !auth.getSession || !Array.isArray(items) || !items.length) {
+      return Promise.resolve({ n: 0, skipped: true });
+    }
+    return auth.getSession().then(function (res) {
+      var sess = res && res.data && res.data.session;
+      var uid = sess && sess.user && sess.user.id;
+      if (!uid) {
+        return { n: 0, skipped: true };
+      }
+      var ix = 0;
+      var pushed = 0;
+      function step() {
+        while (ix < items.length) {
+          var it = items[ix];
+          ix += 1;
+          if (it && it.id != null && String(it.id) !== "") {
+            var itemRef = it;
+            return Promise.resolve(window.__skillsCloudUpsert(itemRef, { skipRefresh: true })).then(
+              function () {
+                pushed += 1;
+                return step();
+              },
+              function (e1) {
+                console.warn("[skills-cloud] bulk sync item", (itemRef && itemRef.id) || "", e1);
+                return step();
+              }
+            );
+          }
+        }
+        window.__skillsCloudRefresh();
+        return Promise.resolve({ n: pushed, skipped: false });
+      }
+      return step();
     });
   };
 

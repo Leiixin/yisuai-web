@@ -131,9 +131,19 @@
       function afterPull() {
         syncUserChrome(sess);
         var pr = typeof window.__skillsCloudRefresh === "function" ? window.__skillsCloudRefresh() : null;
-        Promise.resolve(pr).catch(function (eSk) {
-          console.warn("butterfly auth sync skills refresh", eSk);
-        });
+        Promise.resolve(pr)
+          .catch(function (eSk) {
+            console.warn("butterfly auth sync skills refresh", eSk);
+          })
+          .then(function () {
+            if (sess && typeof window.__agentUrlsSyncAllSkillsToCloudOnce === "function") {
+              return window.__agentUrlsSyncAllSkillsToCloudOnce();
+            }
+            return undefined;
+          })
+          .catch(function (eBulk) {
+            console.warn("butterfly auth sync bulk skills", eBulk);
+          });
       }
       if (sess && typeof window.__profileCloudPull === "function") {
         window.__profileCloudPull().then(afterPull).catch(afterPull);

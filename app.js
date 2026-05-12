@@ -3170,7 +3170,16 @@
           pruneFavoriteOrphans();
           showImportOk("已导入，当前共 " + getItems().length + " 条。");
           render();
-          if (typeof window.__skillsCloudRefresh === "function") {
+          if (typeof window.__skillsCloudSyncLocalList === "function") {
+            window.__skillsCloudSyncLocalList(getItems()).then(function (r) {
+              if (r && r.skipped) {
+                showImportOk("已导入，当前共 " + getItems().length + " 条。登录账号后将自动上传到云端。");
+              } else {
+                showImportOk("已导入，当前共 " + getItems().length + " 条。已上传到云端。");
+              }
+              render();
+            });
+          } else if (typeof window.__skillsCloudRefresh === "function") {
             window.__skillsCloudRefresh();
           }
         } catch (err) {
@@ -3985,6 +3994,19 @@
       });
     }
   }
+
+  /** 每个页面加载周期内至多一次：把本机全部技能 upsert 到云端（需已登录） */
+  var didSkillsCloudBulkThisPage = false;
+  window.__agentUrlsSyncAllSkillsToCloudOnce = function () {
+    if (didSkillsCloudBulkThisPage) {
+      return Promise.resolve({ skipped: true, reason: "already" });
+    }
+    didSkillsCloudBulkThisPage = true;
+    if (typeof window.__skillsCloudSyncLocalList !== "function") {
+      return Promise.resolve({ skipped: true });
+    }
+    return window.__skillsCloudSyncLocalList(getItems());
+  };
 
   window.__onSkillsCloudCacheUpdated = function () {
     render();
