@@ -3688,14 +3688,23 @@
         var ba = window.__butterflyAuth;
         if (ba && ba.isConfigured && ba.isConfigured()) {
           e.preventDefault();
+          e.stopPropagation();
           closeMenu();
-          ba.signOut()
-            .then(function () {
-              window.location.href = "login.html";
-            })
-            .catch(function () {
-              window.location.href = "login.html";
-            });
+          var done = false;
+          function goLogin() {
+            if (done) {
+              return;
+            }
+            done = true;
+            window.location.replace("login.html");
+          }
+          var so = ba.signOut && ba.signOut();
+          if (!so || typeof so.then !== "function") {
+            goLogin();
+            return;
+          }
+          so.then(goLogin).catch(goLogin);
+          setTimeout(goLogin, 5000);
           return;
         }
         closeMenu();

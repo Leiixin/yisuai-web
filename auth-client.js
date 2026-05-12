@@ -50,7 +50,10 @@
       if (!client) {
         return Promise.resolve();
       }
-      return client.auth.signOut();
+      /** scope: local 仅清除本机会话，不依赖服务端撤销；global 默认易在网络差时长时间挂起，导致退出按钮无反应 */
+      return client.auth.signOut({ scope: "local" }).catch(function () {
+        return client.auth.signOut();
+      });
     },
     getSession: function () {
       if (!client) {
