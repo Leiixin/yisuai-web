@@ -8,6 +8,7 @@ create table if not exists public.skills (
   url text not null default '',
   detail_intro text,
   featured_cases text,
+  card_image_data_url text,
   featured_cases_images jsonb not null default '[]'::jsonb,
   skill_category text,
   open_source_mode text,
@@ -18,6 +19,7 @@ create table if not exists public.skills (
 
 create index if not exists skills_user_id_idx on public.skills (user_id);
 create index if not exists skills_created_at_idx on public.skills (created_at desc);
+alter table public.skills add column if not exists card_image_data_url text;
 
 alter table public.skills enable row level security;
 
@@ -32,3 +34,6 @@ create policy "skills_update_own" on public.skills for update using (auth.uid() 
 
 drop policy if exists "skills_delete_own" on public.skills;
 create policy "skills_delete_own" on public.skills for delete using (auth.uid() = user_id);
+
+-- 若表为手工创建，请确保 authenticated 可读写（否则登录后无法 upsert）
+grant select, insert, update, delete on table public.skills to authenticated;

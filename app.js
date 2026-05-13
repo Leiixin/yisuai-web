@@ -11,8 +11,9 @@
   /** 「添加知识」无用户填写 URL 时写入占位链接，满足数据模型 */
   var ADD_SKILL_KNOWLEDGE_URL_PLACEHOLDER = "https://invalid.invalid/knowledge";
   var EMPTY_NO_DATA_STORE =
-    "技能商店暂无条目。在「我的技能」添加链接；若已登录，将自动同步到云端供他人浏览。";
-  var EMPTY_NO_DATA_MINE = "还没有记录。点标题旁的「添加技能」填写名称与网址后保存。";
+    "技能商店暂无条目。在「我的技能」添加并保存；已登录时会写入云端，清除浏览器数据后重新登录仍可恢复。";
+  var EMPTY_NO_DATA_MINE =
+    "还没有记录。点「添加技能」保存；须登录同一账号才会写入云端。若刚清除过浏览器数据，请重新登录，系统会从云端合并回你的技能。";
   var EMPTY_NO_FAV = "暂无收藏。请在技能商店打开技能详情，点底部「收藏链接」加入。";
   var EMPTY_FILTERED = "没有与当前条件匹配的项。可清空搜索框，或改关键词后重试。";
 
@@ -791,6 +792,83 @@
       window.__skillsCloudDelete(id);
     }
     setItems(getItems().filter(function (x) { return x.id !== id; }));
+  }
+
+  /**
+   * 把当前账号在云端已有、但本机 localStorage 尚未出现的技能写回本机。
+   * 解决：清除浏览器数据后同一账号重新登录，「我的技能」为空但云端仍有数据的情况。
+   */
+  function hydrateLocalSkillsFromCloudForCurrentUser() {
+    var uid = window.__skillsCloudSessionUserId;
+    if (!uid) {
+      return 0;
+    }
+    var cloud = window.__skillsCloudCache;
+    if (!Array.isArray(cloud) || !cloud.length) {
+      return 0;
+    }
+    var items = getItems();
+    var seen = {};
+    var k;
+    for (k = 0; k < items.length; k += 1) {
+      if (items[k] && items[k].id != null && String(items[k].id) !== "") {
+        seen[String(items[k].id)] = true;
+      }
+    }
+    var out = items.slice();
+    var added = 0;
+    for (k = 0; k < cloud.length; k += 1) {
+      var c = cloud[k];
+      if (!c || c.id == null || String(c.id) === "") {
+        continue;
+      }
+      if (String(c.cloudUserId || "") !== String(uid)) {
+        continue;
+      }
+      var idStr = String(c.id);
+      if (seen[idStr]) {
+        continue;
+      }
+      seen[idStr] = true;
+      var entry = {
+        id: c.id,
+        name: c.name != null ? String(c.name) : "",
+        url: c.url != null ? String(c.url) : "",
+        createdAt: c.createdAt || new Date().toISOString(),
+      };
+      if (c.skillKind === "knowledge" || c.skillKind === "url") {
+        entry.skillKind = c.skillKind;
+      }
+      if (c.detailIntro != null && String(c.detailIntro).trim()) {
+        entry.detailIntro = String(c.detailIntro).trim();
+      }
+      if (
+        c.cardImageDataUrl &&
+        typeof c.cardImageDataUrl === "string" &&
+        c.cardImageDataUrl.indexOf("data:image/") === 0 &&
+        c.cardImageDataUrl.length <= MAX_IMAGE_DATA_URL
+      ) {
+        entry.cardImageDataUrl = c.cardImageDataUrl;
+      }
+      if (c.featuredCases != null && String(c.featuredCases).trim()) {
+        entry.featuredCases = String(c.featuredCases).trim();
+      }
+      if (c.skillCategory != null && String(c.skillCategory).trim()) {
+        entry.skillCategory = String(c.skillCategory).trim();
+      }
+      if (c.openSourceMode === "yes" || c.openSourceMode === "no") {
+        entry.openSourceMode = c.openSourceMode;
+      }
+      if (Array.isArray(c.featuredCasesImages) && c.featuredCasesImages.length) {
+        entry.featuredCasesImages = c.featuredCasesImages.slice();
+      }
+      out.push(entry);
+      added += 1;
+    }
+    if (added > 0) {
+      setItems(out);
+    }
+    return added;
   }
 
   function updateItemById(id, fn, opts) {
@@ -4009,6 +4087,7 @@
   };
 
   window.__onSkillsCloudCacheUpdated = function () {
+    hydrateLocalSkillsFromCloudForCurrentUser();
     render();
   };
 

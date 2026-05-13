@@ -8,6 +8,8 @@
   var TABLE = "skills";
   /** 与 app.js 知识类占位 URL 一致，用于从云端行推断 skillKind（技能商店「网址/知识」分栏） */
   var KNOWLEDGE_URL_PLACEHOLDER = "https://invalid.invalid/knowledge";
+  /** 与 app.js MAX_IMAGE_DATA_URL 保持一致：单个技能头像 data URL 上限 */
+  var MAX_CARD_IMAGE_CHARS = 2200000;
   /** 单条 JSON 中案例图 data URL 总长度上限，避免请求过大失败 */
   var MAX_IMAGES_JSON_CHARS = 480000;
 
@@ -48,6 +50,13 @@
       url: String(item.url || ""),
       detail_intro: item.detailIntro != null && String(item.detailIntro).length ? String(item.detailIntro) : null,
       featured_cases: item.featuredCases != null && String(item.featuredCases).length ? String(item.featuredCases) : null,
+      card_image_data_url:
+        item.cardImageDataUrl &&
+        typeof item.cardImageDataUrl === "string" &&
+        item.cardImageDataUrl.indexOf("data:image/") === 0 &&
+        item.cardImageDataUrl.length <= MAX_CARD_IMAGE_CHARS
+          ? item.cardImageDataUrl
+          : null,
       featured_cases_images: slimImages(item.featuredCasesImages),
       skill_category: item.skillCategory != null && String(item.skillCategory).trim() ? String(item.skillCategory).trim() : null,
       open_source_mode: item.openSourceMode === "yes" || item.openSourceMode === "no" ? item.openSourceMode : null,
@@ -71,6 +80,13 @@
       createdAt: r.created_at,
       detailIntro: r.detail_intro,
       featuredCases: r.featured_cases,
+      cardImageDataUrl:
+        r.card_image_data_url &&
+        typeof r.card_image_data_url === "string" &&
+        r.card_image_data_url.indexOf("data:image/") === 0 &&
+        r.card_image_data_url.length <= MAX_CARD_IMAGE_CHARS
+          ? r.card_image_data_url
+          : "",
       featuredCasesImages: imgs,
       skillCategory: r.skill_category,
       openSourceMode: r.open_source_mode,
